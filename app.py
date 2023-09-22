@@ -1,5 +1,5 @@
 import streamlit as st
-
+from utilities import *
 def main():
     #config for the app
     st.set_page_config(page_title="Chat with PDF")
@@ -12,7 +12,10 @@ def main():
     with st.sidebar:
         st.subheader("Your documents")
         uploaded_docs = st.file_uploader("Upload or Drop your pdfs here", accept_multiple_files=True, type="pdf")
-        st.button("Process")
+        if st.button("Process"):
+            with st.spinner("Processing the files"):
+                extracted_text = extract_data_from_pdfs(uploaded_docs)
+                st.write(extracted_text)
     # display the conversation
     for message in st.session_state.conversation:
         with st.chat_message(message["role"]):
