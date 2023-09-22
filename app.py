@@ -15,7 +15,8 @@ def main():
         if st.button("Process"):
             with st.spinner("Processing the files"):
                 extracted_text = extract_data_from_pdfs(uploaded_docs)
-                st.write(extracted_text)
+                chunked_text = create_text_chunks(extracted_text)
+                st.write(chunked_text)
     # display the conversation
     for message in st.session_state.conversation:
         with st.chat_message(message["role"]):
