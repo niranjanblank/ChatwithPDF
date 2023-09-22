@@ -46,7 +46,7 @@ def create_conversation_chain(vectorstore):
     """
     Creates a conversation chain to store history of conversation between user and llm
     """
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(streaming=True)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,

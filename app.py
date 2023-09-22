@@ -1,7 +1,7 @@
 import streamlit as st
 from utilities import *
 from dotenv import load_dotenv
-
+from langchain.callbacks import StreamlitCallbackHandler
 def main():
     load_dotenv()
     #config for the app
@@ -37,11 +37,14 @@ def main():
             st.markdown(user_question)
         # save the message to session chat history
         st.session_state.conversation.append({"role":"user","content": user_question})
-        response = st.session_state.conversation_chain({'question': user_question})
+
         # display the assistant message
         with st.chat_message("assistant"):
+            container = st.empty()
+            stream_handler = StreamlitCallbackHandler(container)
+            response = st.session_state.conversation_chain({'question': user_question}, callbacks=[stream_handler])
+            container.markdown(response["answer"])
 
-            st.markdown(response["answer"])
         st.session_state.conversation.append({"role": "assistant", "content": response["answer"]})
 
 if __name__=="__main__":
