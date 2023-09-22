@@ -2,9 +2,11 @@ import streamlit as st
 from utilities import *
 from dotenv import load_dotenv
 from langchain.callbacks import StreamlitCallbackHandler
+
+
 def main():
     load_dotenv()
-    #config for the app
+    # config for the app
     st.set_page_config(page_title="Chat with PDF")
 
     # setting conversation list in the session_state to keep chat history
@@ -14,7 +16,7 @@ def main():
     if "conversation_chain" not in st.session_state:
         st.session_state.conversation_chain = None
     st.header("Chat with PDF")
-    #sidebar for uploading the file
+    # sidebar for uploading the file
     with st.sidebar:
         st.subheader("Your documents")
         uploaded_docs = st.file_uploader("Upload or Drop your pdfs here", accept_multiple_files=True, type="pdf")
@@ -36,16 +38,22 @@ def main():
         with st.chat_message("user"):
             st.markdown(user_question)
         # save the message to session chat history
-        st.session_state.conversation.append({"role":"user","content": user_question})
+        st.session_state.conversation.append({"role": "user", "content": user_question})
 
         # display the assistant message
         with st.chat_message("assistant"):
             container = st.empty()
-            stream_handler = StreamlitCallbackHandler(container)
-            response = st.session_state.conversation_chain({'question': user_question}, callbacks=[stream_handler])
-            container.markdown(response["answer"])
+            text_for_assistant = "Please upload the pdf and click on Process to continue."
+            if uploaded_docs:
+                stream_handler = StreamlitCallbackHandler(container)
+                response = st.session_state.conversation_chain({'question': user_question}, callbacks=[stream_handler])
+                container.markdown(response["answer"])
+                text_for_assistant = response["answer"]
+                # st.session_state.conversation.append({"role": "assistant", "content": response["answer"]})
+            else:
+                container.markdown("Please upload the pdf and click on Process to continue.")
+            st.session_state.conversation.append({"role": "assistant", "content": text_for_assistant})
 
-        st.session_state.conversation.append({"role": "assistant", "content": response["answer"]})
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
