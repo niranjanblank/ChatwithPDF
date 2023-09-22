@@ -1,6 +1,10 @@
 from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
 
 def extract_data_from_pdfs(docs):
     """
@@ -28,3 +32,26 @@ def create_text_chunks(data):
     )
     text_chunks = text_splitter.split_text(data)
     return text_chunks
+
+
+def create_vectorstore(text_chunks):
+    """
+    Function to develop vectorstore from chunks of data retrieved form the pdfs
+    """
+    embeddings = OpenAIEmbeddings()
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
+def create_conversation_chain(vectorstore):
+    """
+    Creates a conversation chain to store history of conversation between user and llm
+    """
+    llm = ChatOpenAI()
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain
+
